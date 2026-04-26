@@ -1,0 +1,29 @@
+[
+  {
+    "screenId": "99eb0781774e4d34b41d8bba277b2277",
+    "title": "pipeline-sayac-121703 PRD",
+    "componentName": "Pipelinesayac121703Prd",
+    "file": "src/screens/Pipelinesayac121703Prd.tsx",
+    "buttons": 0,
+    "inputs": 0,
+    "links": 0
+  },
+  {
+    "screenId": "82a0b121f49a458e98a58c82c879d1be",
+    "title": "Ana Sayfa (Masaüstü)",
+    "componentName": "AnaSayfaMasaustu",
+    "file": "src/screens/AnaSayfaMasaustu.tsx",
+    "buttons": 10,
+    "inputs": 0,
+    "links": 0
+  },
+  {
+    "screenId": "d50a58b5793241cd96dba18740a30433",
+    "title": "Mobil Düzen",
+    "componentName": "MobilDuzen",
+    "file": "src/screens/MobilDuzen.tsx",
+    "buttons": 8,
+    "inputs": 0,
+    "links": 3
+  }
+]
