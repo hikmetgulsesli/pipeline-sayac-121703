@@ -1,0 +1,248 @@
+# Ürün Gereksinimleri Dokümanı — pipeline-sayac-121703
+
+## 1. Genel Bakış
+
+**Proje Adı:** pipeline-sayac-121703  
+**Platform:** Web (React 18 + Vite + TypeScript)  
+**Proje Türü:** Basit Sayaç Uygulaması  
+
+**Ne iş yapar:** Kullanıcıların bir sayacı artırıp, azaltıp ve sıfırlayabildiği minimal, erişilebilir ve responsive bir sayaç uygulaması. Sayaç değeri tarayıcıda localStorage ile kalıcı olarak saklanır.
+
+**Hedef Kitle:** Her yaştan kullanıcı — teknik bilgi gerektirmez. Mobil ve masaüstü tarayıcılarda çalışır.
+
+**Türkçe Arayüz:** Tüm butonlar, etiketler ve hata mesajları Türkçe'dir.
+
+---
+
+## 2. Hedefler
+
+1. **Fonksiyonellik:** Increment (+1), decrement (−1), reset (sıfırla) işlemleri herhangi bir hata olmaksızın çalışmalı.
+2. **Kalıcılık:** Sayacın mevcut değeri sayfa yeniden yüklense bile localStorage üzerinden korunmalı.
+3. **Klavye Desteği:** `+` tuşu artırır, `-` tuşu azaltır, `R` tuşu sıfırlar.
+4. **Responsive Tasarım:** Mobil (320px), tablet (768px) ve masaüstü (1920px+) ekranlarda düzgün görünür.
+5. **Erişilebilirlik:** WCAG 2.1 AA uyumlu — klavye navigasyonu, ARIA etiketleri, yeterli kontrast.
+6. **Hızlı Yükleme:** İlk yükleme 2 saniyeden kısa, interaksiyon gecikmesi < 50ms.
+7. **Sade Tasarım:**Karışıklığı önleyen, göz yormayan, temiz bir UI.
+
+---
+
+## 3. Tech Stack Detayı
+
+| Katman       | Teknoloji                          |
+|--------------|------------------------------------|
+| Framework    | React 18.3.x                       |
+| Build        | Vite 6.x                           |
+| Language     | TypeScript 5.x                     |
+| Styling      | CSS Modules veya vanilla CSS (scoped) |
+| State        | useState (built-in React state)     |
+| Storage      | localStorage API                   |
+| Routing      | Yok (tek sayfa — SPA)              |
+| Icons        | Lucide React (SVG tabanlı)         |
+
+**Neden localStorage:** DB_REQUIRED: none. Kalıcılık gereksinimi yalnızca tarayıcı tarafında karşılanmalı — sunucu yok.
+
+---
+
+## 4. Fonksiyonel Gereksinimler
+
+### 4.1 Sayac Görüntüleme
+
+- Sayacın mevcut değeri ekranın merkezinde büyük font ile gösterilir.
+- Başlangıç değeri: 0
+- Negatif değer gösterimi desteklenir (−999 … +999 aralığında).
+- Değer değiştiğinde hafif bir animasyon uygulanır (scale pulse, 150ms).
+
+### 4.2 Artır Butonu (+)
+
+- Etiket: "Artır" veya "+" simgesi.
+- Davranış: Sayacı +1 artırır.
+- Klavye: `+` (numPad veya ASCII +) tuşu aynı işlevi yapar.
+- Üst limit yok (ancak aşırı büyük değerler için görüntü kırılabilir — boundary: ±99999).
+
+### 4.3 Azalt Butonu (−)
+
+- Etiket: "Azalt" veya "−" simgesi.
+- Davranış: Sayacı −1 azaltır.
+- Klavye: `-` (numPad veya ASCII -) tuşu aynı işlevi yapar.
+- Alt limit yok.
+
+### 4.4 Sıfırla Butonu
+
+- Etiket: "Sıfırla" veya sıfırlama ikonu.
+- Davranış: Sayacı 0'a döndürür.
+- Klavye: `R` veya `r` tuşu aynı işlevi yapar.
+- Görsel bir onay gerekmez (hızlı reset).
+
+### 4.5 localStorage Kalıcılığı
+
+- Her sayaç değişikliğinde (artır/azalt/sıfırla) mevcut değer `localStorage.setItem('sayac_deger', <number>)` olarak kaydedilir.
+- Sayfa yüklendiğinde `localStorage.getItem('sayac_deger')` ile değer okunur. Eksik veya geçersiz ise 0 kullanılır.
+- Storage key: `sayac_deger`
+
+### 4.6 Klavye Kısayolları
+
+| Tuş      | Eylem        |
+|----------|--------------|
+| `+`      | Artır (+1)   |
+| `-`      | Azalt (−1)   |
+| `R` / `r`| Sıfırla      |
+
+Tüm klavye eventleri `keydown` ile yakalanır. Focus durumunda çalışır — input elementi olmadığında sayfa genelinde dinlenebilir.
+
+---
+
+## 5. Veri Modeli
+
+### Entity: Counter
+
+```
+Counter {
+  value: number   // -99999 ile +99999 arası
+}
+```
+
+### localStorage Schema
+
+```
+Key: "sayac_deger"
+Value: string (JSON.stringify(number))
+```
+
+Örnek: `localStorage.setItem('sayac_deger', JSON.stringify(42))`
+
+---
+
+## 6. UI/UX Gereksinimler
+
+### 6.1 Design System
+
+**Aesthetic:** Playful — yumuşak köşeler, canlı renk, minimal ama samimi.
+
+**Renk Paleti:**
+| Rol        | Hex       | Kullanım                        |
+|------------|-----------|----------------------------------|
+| Primary    | #6366F1   | Artır butonu, vurgu               |
+| Secondary  | #F59E0B   | Azalt butonu                     |
+| Background | #F8FAFC   | Sayfa arka planı                 |
+| Surface    | #FFFFFF   | Kart/bileşen yüzeyi              |
+| Text       | #1E293B   | Ana metin                        |
+| Text Muted | #64748B   | İkincil metin                    |
+| Border     | #E2E8F0   | Çizgiler, kart kenarları         |
+| Success    | #10B981   | Sıfırla başarılı indicator        |
+| Error      | #EF4444   | Yalnızca olası validation hataları |
+
+**Tipografi:**
+- Heading: "Nunito" (Google Fonts) — yuvarlak, samimi
+- Body: "Inter" — okunabilir, modern
+
+**Spacing Scale:** 4 / 8 / 16 / 24 / 32 / 48 / 64 px
+
+**Border Radius:** 8px (butonlar), 12px (kartlar), 999px (yuvarlak chip'ler)
+
+**Shadow:**
+- Card: `0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06)`
+- Elevated: `0 4px 6px rgba(0,0,0,0.1)`
+
+**Icon Library:** Lucide React — `Plus`, `Minus`, `RotateCcw`
+
+### 6.2 Bileşenler
+
+| Bileşen       | Açıklama                                           |
+|---------------|----------------------------------------------------|
+| CounterDisplay| Sayac değerini büyük font ile gösterir, pulse animasyonu |
+| ActionButton  | Artır/Azalt/Sıfırla butonları (primary/secondary/variant) |
+| CounterCard   | Tüm sayaç UI'sini saran kart kapsayıcı            |
+
+**Buton boyutları:** minimum 44×44 px (touch hedef, WCAG AA)
+
+---
+
+## 7. Non-Functional Requirements
+
+### 7.1 Performans
+- İlk yükleme: < 1.5s (Vite hızlı build + minimal bundle)
+- Bundle size hedefi: < 50KB gzipped (sadece React + sayaç bileşenleri)
+- Interaksiyon gecikmesi: < 50ms
+
+### 7.2 Erişilebilirlik (WCAG 2.1 AA)
+- Tüm butonlar: `aria-label` ile ekran okuyucuya açıklama
+- Klavye navigasyonu: Tab/Shift+Tab ile tüm kontroller erişilebilir
+- Focus state: Tüm interactive elementlerde görünür focus ring (#6366F1)
+- Kontrast: Tüm metin >= 4.5:1, büyük metin >= 3:1
+- Touch hedefleri: >= 44×44 px
+
+### 7.3 Tarayıcı Desteği
+- Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
+- iOS Safari 14+, Android Chrome 90+
+- Responsive: 320px (mobil) → 1920px (desktop)
+
+### 7.4 Responsive Breakpoints
+| Breakpoint | Genişlik     | Düzen                      |
+|------------|--------------|----------------------------|
+| Mobil      | 320px – 767px| Yatay, düğmeler alt alta   |
+| Tablet     | 768px – 1023px| Düğmeler yatay yan yana   |
+| Desktop    | 1024px+      | Merkezi kart, geniş alan   |
+
+---
+
+## 8. Proje Yapısı
+
+```
+src/
+├── components/
+│   ├── CounterDisplay.tsx    # Sayac değeri gösterimi
+│   ├── ActionButton.tsx     # Tekrar kullanılabilir buton
+│   ├── CounterCard.tsx      # Ana sayaç kartı
+│   └── KeyboardHandler.tsx  # Klavye event hook
+├── hooks/
+│   ├── useCounter.ts        # State + localStorage mantığı
+│   └── useKeyboard.ts       # Klavye kısayol hook
+├── styles/
+│   └── globals.css          # CSS değişkenleri, reset
+├── types/
+│   └── counter.ts           # TypeScript tipleri
+├── App.tsx
+├── main.tsx
+└── index.html
+```
+
+---
+
+## 9. Window State (testing/dogfood)
+
+```typescript
+window.app = {
+  state: 'idle',
+  counter: 0,
+  // test amaçlı expose
+}
+```
+
+---
+
+## 10. Ekranlar
+
+| # | Ekran Adı | Tür            | Açıklama |
+|---|-----------|----------------|----------|
+| 1 | Ana Sayfa (Sayaç) | main | Merkezi sayaç kartı: değer gösterimi, artır/azalt/sıfırla butonları |
+| 2 | Mobil Düzen | responsive variant | Aynı içerik, düğmeler dikey stack, uyumlu padding |
+| 3 | Klavye Odaklı Kullanım | accessibility | Sayfa yüklendiğinde otomatik focus, klavye ile tam kontrol |
+
+---
+
+## 11. Ek Notlar
+
+- "En fazla 3 kısa story" gereksinimi göz önünde bulundurularak story decomposition'da sıkıştırma yapılacaktır.
+- Sayaç sıfırlandığında görsel bir başarı animasyonu (yeşil pulse) kullanıcıya geri bildirim verecek.
+- Hiçbir sunucu, veritabanı veya API çağrısı yok — tamamen client-side.
+
+Generate a SEPARATE screen design for EVERY page, view, modal, dialog, tab panel, and settings screen described in this PRD. Do NOT skip ANY screen — even if it seems minor.
+
+MANDATORY SCREENS:
+- If the PRD mentions "settings" or "ayarlar" → generate a Settings screen
+- If the PRD mentions tabs or bottom navigation → generate EACH tab view as a separate screen
+- If the PRD mentions modals (statistics, help, share, confirmation) → generate each as a separate screen
+- If the PRD mentions error states, empty states, loading states → generate those too
+- Generate at least as many screens as there are distinct views/pages/modals in the PRD
+
+All visible text must be in Turkish. Use a dark, modern theme.
